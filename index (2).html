@@ -2,132 +2,106 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GỬI BÀ CHJ XẤU XEI👿</title>
+    <title>Trang web Của Bạn</title>
     <style>
-        :root {
-            --bg-color: #add8e6;
-            --outline-color: #ffb6c1;
-            --text-color: white;
-        }
-
         body {
-            margin: 0;
-            padding: 0;
+            /* Màu nền xanh dương nhạt ban đầu */
+            background-color: #e3f2fd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: var(--bg-color);
-            font-family: 'Arial', sans-serif;
-            overflow: hidden; /* Không cho cuộn trang khi hiện popup */
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            transition: background-color 0.5s ease; /* Thêm hiệu ứng đổi màu mượt mà */
         }
 
-        /* Container chính */
-        .main-container {
-            text-align: center;
-            z-index: 100;
-        }
-
-        .title-text {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--text-color);
-            text-shadow:
-                -1.5px -1.5px 0 var(--outline-color),
-                 1.5px -1.5px 0 var(--outline-color),
-                -1.5px  1.5px 0 var(--outline-color),
-                 1.5px  1.5px 0 var(--outline-color);
-            margin-bottom: 30px;
-        }
-
-        .btn-start {
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            background-color: white;
-            color: var(--outline-color);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .btn-start:active {
-            transform: scale(0.95);
-        }
-
-        /* Style cho cửa sổ Popup giả */
-        .popup {
+        /* ... các phần CSS khác giữ nguyên ... */
+        .icon {
             position: absolute;
-            width: 400px;
-            height: 100px;
-            background-color: var(--bg-color);
-            border: 2px solid white;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 8px;
-            z-index: 1000;
-            pointer-events: none; /* Không cản trở việc click tiếp */
-            animation: popIn 0.3s ease-out;
+            font-size: 24px;
+            animation: float 4s infinite ease-in-out;
+            opacity: 0.5;
+            user-select: none;
         }
 
-        .popup-text {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--text-color);
-            text-shadow:
-                -1.5px -1.5px 0 var(--outline-color),
-                 1.5px -1.5px 0 var(--outline-color),
-                -1.5px  1.5px 0 var(--outline-color),
-                 1.5px  1.5px 0 var(--outline-color);
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        #container {
             text-align: center;
+            z-index: 10;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        @keyframes popIn {
-            0% { transform: scale(0); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        button {
+            padding: 10px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            transition: 0.3s;
         }
+
+        #start-btn { background-color: #2196f3; color: white; }
+        #yes-btn { background-color: #4caf50; color: white; margin-right: 10px; }
+        #no-btn {
+            background-color: #f44336; color: white;
+            position: absolute;
+        }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <div class="title-text">E cs cái này nekk</div>
-        <button class="btn-start" onclick="startSpam(50)">ĐẬP VOO</button>
+    <div class="icon" style="top:10%; left:10%">🌟</div>
+    <div class="icon" style="top:20%; left:80%">☁️</div>
+    <div class="icon" style="top:70%; left:15%">✨</div>
+    <div class="icon" style="top:80%; left:85%">🎈</div>
+    <div class="icon" style="top:35%; left:80%">🌸</div>
+
+    <div id="container">
+        <div id="screen-1">
+            <h1>Quắt sấp bro ✨</h1>
+            <button id="start-btn" onclick="startApp()">nhấn đêy</button>
+        </div>
+
+        <div id="screen-2" class="hidden">
+            <h2 id="question">E cho tiền chj nhá 👉👈</h2>
+            <div style="height: 50px; position: relative; margin-top: 20px;">
+                <button id="yes-btn" onclick="sayYes()">okkk🤥</button>
+                <button id="no-btn" onmouseover="moveButton()" onclick="moveButton()">thôi💔</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        function createSinglePopup() {
-            const popup = document.createElement('div');
-            popup.className = 'popup';
-
-            // Tính toán vị trí ngẫu nhiên
-            const maxX = window.innerWidth - 400;
-            const maxY = window.innerHeight - 100;
-            const randomX = Math.floor(Math.random() * maxX);
-            const randomY = Math.floor(Math.random() * maxY);
-
-            popup.style.left = randomX + 'px';
-            popup.style.top = randomY + 'px';
-
-            // Nội dung
-            popup.innerHTML = `<div class="popup-text">E thik chj 💞chj lm ng e yeu nhaa👉👈</div>`;
-
-            document.body.appendChild(popup);
+        function startApp() {
+            document.getElementById('screen-1').classList.add('hidden');
+            document.getElementById('screen-2').classList.remove('hidden');
         }
 
-        function startSpam(count) {
-            if (count > 0) {
-                createSinglePopup();
-                // root.after(150) trong Python tương đương setTimeout trong JS
-                setTimeout(() => {
-                    startSpam(count - 1);
-                }, 100);
-            }
+        function moveButton() {
+            const btn = document.getElementById('no-btn');
+            const x = Math.random() * (window.innerWidth - btn.offsetWidth);
+            const y = Math.random() * (window.innerHeight - btn.offsetHeight);
+
+            btn.style.left = x + 'px';
+            btn.style.top = y + 'px';
+            btn.style.position = 'fixed';
+        }
+
+        function sayYes() {
+            document.getElementById('container').innerHTML = "<h1>okk bt điều đó</h1><p>💩💩💩</p>";
+            // Đã đổi từ màu vàng (#ffc107) sang màu xanh dương nhạt (#99FFFF)
+            document.body.style.backgroundColor = "#99FFFF";
         }
     </script>
 </body>
