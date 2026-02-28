@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GỬI BÀ CHJ XẤU XEI👿</title>
+    <style>
+        :root {
+            --bg-color: #add8e6; /* Màu xanh nhạt từ Python */
+            --outline-color: #ffb6c1; /* Màu hồng nhạt viền chữ */
+            --text-color: white;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden; /* Ngăn cuộn trang khi hiện nhiều popup */
+        }
+
+        /* Giao diện chính tương đương cửa sổ root */
+        .main-container {
+            text-align: center;
+            z-index: 100;
+        }
+
+        .title-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-color);
+            /* Tạo viền chữ tương đương hàm draw_outlined_text */
+            text-shadow:
+                -1.5px -1.5px 0 var(--outline-color),
+                 1.5px -1.5px 0 var(--outline-color),
+                -1.5px  1.5px 0 var(--outline-color),
+                 1.5px  1.5px 0 var(--outline-color);
+            margin-bottom: 30px;
+        }
+
+        .btn-start {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background-color: white;
+            color: var(--outline-color);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-start:active {
+            transform: scale(0.95);
+        }
+
+        /* Style cho các cửa sổ thông báo (Toplevel) */
+        .popup {
+            position: absolute;
+            width: 450px;
+            height: 100px;
+            background-color: var(--bg-color);
+            border: 2px solid white;
+            box-shadow: 5px 5px 20px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            z-index: 1000;
+            pointer-events: none; /* Cho phép click xuyên qua popup */
+            animation: popIn 0.3s ease-out;
+        }
+
+        .popup-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-color);
+            text-shadow:
+                -1.5px -1.5px 0 var(--outline-color),
+                 1.5px -1.5px 0 var(--outline-color),
+                -1.5px  1.5px 0 var(--outline-color),
+                 1.5px  1.5px 0 var(--outline-color);
+            text-align: center;
+            padding: 10px;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="title-text">E cs cái này nekk</div>
+        <button class="btn-start" onclick="startSpam(50)">ĐẬP VOO</button>
+    </div>
+
+    <script>
+        function createSinglePopup() {
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+
+            // Tính toán vị trí ngẫu nhiên trên màn hình tương đương random.randint
+            const maxX = window.innerWidth - 450;
+            const maxY = window.innerHeight - 100;
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+
+            popup.style.left = randomX + 'px';
+            popup.style.top = randomY + 'px';
+
+            // Nội dung tin nhắn từ code Python
+            popup.innerHTML = `<div class="popup-text">E thik chj 💞chj lm ng e yeu nhaa👉👈</div>`;
+
+            document.body.appendChild(popup);
+        }
+
+        // Hàm hiện lần lượt tương đương spawn_50
+        function startSpam(count) {
+            if (count > 0) {
+                createSinglePopup();
+                // Tốc độ hiện popup (150ms) tương đương root.after(150)
+                setTimeout(() => {
+                    startSpam(count - 1);
+                }, 150);
+            }
+        }
+    </script>
+</body>
+</html>
