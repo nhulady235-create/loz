@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Sửa lỗi nút bấm</title>
+</head>
+<body style="background:#1a472a; color:white; text-align:center; font-family:sans-serif;">
+    <h1>KIỂM TRA CHIA BÀI</h1>
+
+    <div id="vung-bai" style="border:2px dashed white; height:120px; margin:20px; display:flex; justify-content:center; align-items:center; gap:10px;">
+        (Bài sẽ hiện ở đây)
+    </div>
+
+    <button onclick="
+        const la1 = Math.floor(Math.random()*9 + 2) + '♥';
+        const la2 = Math.floor(Math.random()*9 + 2) + '♣';
+        document.getElementById('vung-bai').innerHTML =
+            '<div style=\'background:white; color:black; width:60px; height:90px; border-radius:5px; line-height:90px; font-weight:bold; font-size:20px;\'>' + la1 + '</div>' +
+            '<div style=\'background:white; color:black; width:60px; height:90px; border-radius:5px; line-height:90px; font-weight:bold; font-size:20px;\'>' + la2 + '</div>';
+        this.innerHTML = 'ĐÃ CHIA!';
+        this.style.background = '#7f8c8d';
+    " style="padding:15px 30px; font-size:20px; cursor:pointer; background:gold; border:none; border-radius:5px;">
+        CHIA BÀI NGAY
+    </button>
+</body>
+</html>
