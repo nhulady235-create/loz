@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Casino Xì Dách</title>
+    <style>
+        body { background: #1a472a; color: white; text-align: center; font-family: sans-serif; }
+        .zone { border: 2px dashed #fff; min-height: 100px; margin: 10px auto; width: 300px; border-radius: 10px; display: flex; justify-content: center; align-items: center; gap: 5px; padding: 10px; }
+        .card { width: 50px; height: 75px; background: white; color: black; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+        button { padding: 10px 15px; font-size: 16px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; margin: 5px; }
+        #deal-btn { background: #f1c40f; }
+        #hit-btn { background: #2ecc71; color: white; }
+        #stand-btn { background: #e74c3c; color: white; }
+        button:disabled { background: #7f8c8d; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h2>CASINO XÌ DÁCH</h2>
+    <div id="status" style="color: #f1c40f;">Nhấn "CHIA BÀI" để chơi</div>
+
+    <p>BÀI NHÀ CÁI: <span id="d-score">?</span></p>
+    <div id="dealer-zone" class="zone"></div>
+
+    <p>BÀI CỦA BẠN: <span id="p-score">0</span></p>
+    <div id="player-zone" class="zone"></div>
+
+    <button id="deal-btn" onclick="dau_van()">CHIA BÀI</button>
+    <button id="hit-btn" onclick="rut_bai()" disabled>RÚT BÀI</button>
+    <button id="stand-btn" onclick="dan_bai()" disabled>DẰN BÀI</button>
+
+    <script>
+        let pHand = [], dHand = [];
+        const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+        const suits = ['♥','♦','♣','♠'];
+
+        function lay_bai() {
+            return ranks[Math.floor(Math.random()*ranks.length)] + suits[Math.floor(Math.random()*suits.length)];
+        }
+
+        function dau_van() {
+            pHand = [lay_bai(), lay_bai()];
+            dHand = [lay_bai(), lay_bai()];
+
+            document.getElementById('deal-btn').disabled = true;
+            document.getElementById('hit-btn').disabled = false;
+            document.getElementById('stand-btn').disabled = false;
+
+            hien_thi(true);
+            document.getElementById('status').innerText = "Đã chia bài. Bạn muốn Rút hay Dằn?";
+        }
+
+        function hien_thi(an_bai_chu) {
+            let pZone = document.getElementById('player-zone');
+            let dZone = document.getElementById('dealer-zone');
+
+            pZone.innerHTML = pHand.map(c => `<div class="card">${c}</div>`).join('');
+            dZone.innerHTML = dHand.map((c, i) => i === 1 && an_bai_chu ? `<div class="card" style="background:#ccc">?</div>` : `<div class="card">${c}</div>`).join('');
+        }
+
+        function rut_bai() {
+            pHand.push(lay_bai());
+            hien_thi(true);
+            if (pHand.length > 4) {
+                document.getElementById('status').innerText = "Bạn đã rút tối đa 5 lá!";
+                document.getElementById('hit-btn').disabled = true;
+            }
+        }
+
+        function dan_bai() {
+            hien_thi(false);
+            document.getElementById('status').innerText = "Kết thúc ván chơi!";
+            document.getElementById('deal-btn').disabled = false;
+            document.getElementById('hit-btn').disabled = true;
+            document.getElementById('stand-btn').disabled = true;
+        }
+    </script>
+</body>
+</html>
