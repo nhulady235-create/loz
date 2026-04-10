@@ -2,133 +2,139 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gửi chút năng lượng</title>
+    <title>Gửi Như Ý</title>
     <style>
         body {
             margin: 0;
-            height: 100vh;
+            overflow: hidden;
+            background-color: black;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #fff0f5; /* Màu hồng nhạt cho ấm áp */
+            height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
         }
 
-        #container {
-            text-align: center;
-            position: relative;
-        }
-
-        /* Bàn tay được làm bự ra (150px) */
-        .hand {
-            font-size: 150px;
-            cursor: pointer;
-            display: inline-block;
-        }
-
-        /* Hiệu ứng đập đập 2 cái */
-        .knock {
-            animation: knockAnim 0.8s ease-in-out 2;
-        }
-
-        @keyframes knockAnim {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1) translateY(-30px); }
-        }
-
-        .pill-icon {
-            font-size: 80px;
-            cursor: pointer;
-            margin-top: 20px;
-            display: none;
-            filter: drop-shadow(2px 4px 10px rgba(0,0,0,0.1));
-        }
-
-        /* Giường to hơn */
-        .bed-icon {
-            font-size: 180px;
-            display: none;
-        }
-
-        /* Bàn tay vỗ giường bự và nhẹ nhàng */
-        .pat-hand {
-            font-size: 100px;
-            display: none;
+        canvas {
             position: absolute;
-            top: -40px;
-            right: -50px;
-            animation: patAnim 1.2s infinite;
+            top: 0;
+            left: 0;
         }
 
-        @keyframes patAnim {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(30px) rotate(-15deg); }
+        #overlay-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            width: 80%;
+            pointer-events: none;
         }
 
+        /* Hiệu ứng đếm số và tâm thư */
         #message {
-            margin-top: 30px;
-            font-size: 32px;
-            color: #4a4a4a;
+            color: #ADD8E6; /* Xanh nhạt */
+            font-size: 3rem;
             font-weight: bold;
-            min-height: 1.5em;
+            text-shadow: 0 0 10px #ADD8E6, 0 0 20px #fff;
+            line-height: 1.6;
+            transition: opacity 1s;
         }
     </style>
 </head>
 <body>
 
-<div id="container">
-    <div id="hand-main" class="hand knock">🖐️</div>
-    <div id="pill" class="pill-icon" onclick="takeMedicine()">💊</div>
-    <div id="bed-container" style="position: relative; display: inline-block;">
-        <div id="bed" class="bed-icon">🛏️</div>
-        <div id="pat-hand" class="pat-hand">🖐️</div>
+    <canvas id="ledCanvas"></canvas>
+    <div id="overlay-container">
+        <div id="message"></div>
     </div>
-    <div id="message"></div>
-</div>
 
-<script>
-    const handMain = document.getElementById('hand-main');
-    const pill = document.getElementById('pill');
-    const message = document.getElementById('message');
-    const bed = document.getElementById('bed');
-    const patHand = document.getElementById('pat-hand');
+    <script>
+        const canvas = document.getElementById('ledCanvas');
+        const ctx = canvas.getContext('2d');
+        const messageEl = document.getElementById('message');
 
-    // Sau khi đập tay xong (1.6s) thì hiện chữ và thuốc
-    setTimeout(() => {
-        handMain.classList.remove('knock');
-        message.innerText = "nè";
-        pill.style.display = "block";
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-        // Chờ 1.5 giây
-        setTimeout(() => {
-            message.innerText = "chj ms chế đó";
+        const textMatrix = "Yêu Như Ý";
+        const fontSize = 20;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+        let runMatrix = true;
 
-            // Chờ tiếp 1.5 giây
-            setTimeout(() => {
-                message.innerText = "uống thử đi";
-            }, 1500);
+        // 1. Hiệu ứng Matrix LED Xanh nhạt & Trắng
+        function drawMatrix() {
+            if (!runMatrix) return;
 
-        }, 1500);
-    }, 1600);
+            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    function takeMedicine() {
-        // Ẩn thuốc và bàn tay xòe ban đầu
-        pill.style.display = "none";
-        handMain.style.display = "none";
+            ctx.font = fontSize + "px monospace";
 
-        // Hiện câu nói uống rồi nghỉ đi
-        message.innerText = "uống r thì nghỉ đi";
+            for (let i = 0; i < drops.length; i++) {
+                // Đổi màu: xanh nhạt hoặc trắng có phát sáng
+                const color = Math.random() > 0.5 ? "#ADD8E6" : "#FFFFFF";
+                ctx.fillStyle = color;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = color;
 
-        // Hiện giường và bàn tay vỗ nhẹ kèm câu chốt
-        setTimeout(() => {
-            bed.style.display = "block";
+                const char = textMatrix[Math.floor(Math.random() * textMatrix.length)];
+                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
 
-            message.innerText = "lại đây chj ôm e ngủ babi";
-        }, 1000);
-    }
-</script>
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+            requestAnimationFrame(drawMatrix);
+        }
 
+        // 2. Hàm tạo hiệu ứng đánh chữ từng ký tự
+        async function typeWriter(text) {
+            messageEl.innerHTML = "";
+            for (let char of text) {
+                messageEl.innerHTML += char;
+                // Tốc độ đánh chữ: 80ms mỗi chữ
+                await new Promise(r => setTimeout(r, 80));
+            }
+        }
+
+        // 3. Kịch bản chính (Main Timeline)
+        async function startLoveStory() {
+            drawMatrix();
+
+            // Chờ 2 giây đầu
+            await new Promise(r => setTimeout(r, 2000));
+
+            // Hiện số 1 -> đợi 1s -> số 2 -> đợi 1s -> số 3
+            messageEl.innerText = "1";
+            await new Promise(r => setTimeout(r, 1000));
+            messageEl.innerText = "2";
+            await new Promise(r => setTimeout(r, 1000));
+            messageEl.innerText = "3";
+            await new Promise(r => setTimeout(r, 1000));
+
+            // Màn hình dần đen thui (Dừng matrix và xóa canvas)
+            runMatrix = false;
+            messageEl.innerText = "";
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            await new Promise(r => setTimeout(r, 1000)); // Đợi một chút trong bóng tối
+
+            // Hiện ra từng chữ cái dãy tâm thư
+            const longText = "Helo Như Ý của ainhu, ainhu yeu như ý lm, cx mong sau này cs thể cùng vs như ý vượt qua hết tất cả cung bậc cảm xúc như buồn vui hạnh phúc, sau tất cả..ta lại về với nhau nhá cdang💞💗";
+
+            messageEl.style.fontSize = "1.8rem"; // Chỉnh cỡ chữ nhỏ lại cho vừa đoạn văn
+            await typeWriter(longText);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        startLoveStory();
+    </script>
 </body>
 </html>
