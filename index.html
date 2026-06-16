@@ -1,155 +1,264 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gửi người thương ❤️</title>
+    <title>Do you love me?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #000;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        *, *::before, *::after {
+            box-sizing: border-box;
         }
-
-        /* Canvas cho hiệu ứng mưa */
-        canvas {
+        
+        body {
+            background-color: #000000;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            font-family: 'Press Start 2P', monospace;
+        }
+        .wrapper {
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        .pixel-window {
+            background-color: #000000;
+            /* Đã thay đổi border style từ 'double' thành 'solid' để loại bỏ khoảng hở */
+            border: 6px solid #ffffff; 
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 12px 12px 0px #1a1a1a;
+            /* Đảm bảo nội dung không bị lộ ra ngoài đường viền khi rung */
+            overflow: hidden;
+            transition: transform 0.1s ease;
         }
 
-        /* Phần hiển thị Text */
-        #text-container {
-            position: relative;
-            z-index: 2;
+        .window-bar {
+            /* Đường kẻ dưới thanh tiêu đề */
+            border-bottom: 4px solid #ffffff;
+            padding: 10px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .window-dot {
+            width: 8px;
+            height: 8px;
+            /* Nút tròn dạng pixel, đổi sang 'solid' để thống nhất */
+            border: 2px solid #ffffff;
+        }
+
+        .window-body {
+            padding: 50px 20px;
             text-align: center;
-            width: 80%;
         }
 
-        .message {
-            font-size: 2.5rem;
-            font-weight: bold;
-            text-shadow: 0 0 20px #ff69b4;
-            opacity: 0;
+        .title-text {
+            color: #ffffff;
+            font-size: 13pt;
+            line-height: 1.6;
+            margin: 0 0 45px 0;
+            font-weight: normal;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+        }
+        .pixel-btn {
+            background: transparent;
+            color: #ffffff;
+            border: 4px outset #ffffff; 
+            padding: 12px 24px;
+            font-size: 11pt;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            outline: none;
+            transition: transform 0.2s ease;
+        }
+
+        .pixel-btn:hover {
+            background: #ffffff;
+            color: #000000;
+            border: 4px inset #ffffff; 
+        }
+        .neon-center-set {
             display: none;
-            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+            position: absolute;
+            top: 53%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0px;
+            z-index: 6;
+            user-select: none;
+            pointer-events: none;
+        }
+        .neon-text {
+            color: #ffccff;
+            font-size: 26pt;
+            text-align: center;
+            margin-bottom: 5px;
+            text-shadow: 
+                0 0 5px #ffccff,
+                0 0 15px #ff3399,
+                0 0 30px #ff3399;
+        }
+        .neon-heart-svg {
+            width: 140px;
+            height: 140px;
+            filter: drop-shadow(0 0 4px #ffccff)
+                    drop-shadow(0 0 10px #ff3399)
+                    drop-shadow(0 0 25px #ff3399)
+                    drop-shadow(0 0 45px #ff3399);
+        }
+        .matrix-bg {
+            display: none; 
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            overflow: hidden;
+            z-index: 1;
+            opacity: 0; 
+            transition: opacity 0.2s ease;
+        }
+        .matrix-column {
+            display: flex;
+            flex-direction: column;
+            white-space: nowrap;
+            font-size: 13px; 
+            line-height: 1.5;
+            color: rgba(255, 51, 153, 0.45);
+            user-select: none;
+        }
+        .matrix-move {
+            animation: scrollDown 10s linear infinite;
+        }
+        .matrix-column:nth-child(even) .matrix-move {
+            animation: scrollDown 7s linear infinite;
         }
 
-        /* Hiệu ứng biến mất (Fade out) */
-        .fade-out {
-            opacity: 0 !important;
-            transform: scale(0.8);
-        }
-
-        /* Trái tim cuối cùng */
-        .heart-icon {
-            font-size: 5rem;
-            color: #ff1493;
-            display: inline-block;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+        @keyframes scrollDown {
+            0% {
+                transform: translateY(-50%);
+            }
+            100% {
+                transform: translateY(0%);
+            }
         }
     </style>
 </head>
 <body>
 
-    <canvas id="canvas"></canvas>
-
-    <div id="text-container">
-        <div class="message" id="msg1">Hé lo iu dấu của c... ✨💖</div>
-        <div class="message" id="msg2">Thật tốt khi chị gặp được em, em là món quà mà chị rất trân trọng.</div>
-        <div class="message" id="msg3">Chị yeu e.. chị yêu cả nỗi buồn,</div>
-        <div class="message" id="msg4">yeu những lần e khóc, yeu quá khứ của e💖</div>
-        <div class="message" id="msg5">Xinloi e về những lần chị vụng về.. về những lần chị vô tâm..</div>
-        <div class="message" id="msg6">Chị yeu e lắm.. nên chị sẽ thay đổi.. cho chị cơ hội nhá</div>
-        <div class="message" id="msg7">
-            Chị thương em.. <br>
-            <span class="heart-icon">❤️</span>
+    <div class="wrapper" id="viewInterface">
+        <div class="pixel-window" id="popupWindow">
+            <div class="window-bar">
+                <span class="window-dot"></span>
+                <span class="window-dot"></span>
+                <span class="window-dot"></span>
+            </div>
+            <div class="window-body">
+                <h1 class="title-text">Do you love me?</h1>
+                <div class="btn-container">
+                    <button class="pixel-btn" id="yesBtn" onclick="triggerYes()">Yes</button>
+                    <button class="pixel-btn" id="noBtn" onclick="triggerNo()">No</button>
+                </div>
+            </div>
         </div>
     </div>
+    
+    <div class="neon-center-set" id="neonSet">
+        <div class="neon-text">I LOVE U TOO</div>
+        
+        <svg class="neon-heart-svg" viewBox="0 0 24 24" fill="#ffccff">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+    </div>
+
+    <div class="matrix-bg" id="bgContainer"></div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        const bgContainer = document.getElementById('bgContainer');
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        let yesScale = 1;
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        function buildMatrixBackground() {
+            bgContainer.innerHTML = '';
+            
+            const charWidth = 140; 
+            const columnCount = Math.ceil(window.innerWidth / charWidth) + 1;
+            
+            let textBlock = "";
+            for (let i = 0; i < 60; i++) {
+                textBlock += "I LOVE U TOO<br>";
+            }
 
-        // Tên "THANH AN" và các biểu tượng cảm xúc được thả rơi ngẫu nhiên
-        const charList = ['T', 'H', 'A', 'N', 'H', 'A', 'N', '❤️', '♥'];
-        const fontSize = 16;
-        const columns = canvas.width / fontSize;
-        const drops = Array(Math.floor(columns)).fill(1);
+            for (let i = 0; i < columnCount; i++) {
+                const col = document.createElement('div');
+                col.className = 'matrix-column';
+                
+                const moveDiv = document.createElement('div');
+                moveDiv.className = 'matrix-move';
+                moveDiv.innerHTML = textBlock + textBlock;
+                
+                col.style.opacity = (Math.random() * 0.5 + 0.3).toFixed(2);
+                moveDiv.style.animationDelay = (Math.random() * -10) + 's';
 
-        // 1. Vẽ hiệu ứng mưa (Rain Love)
-        function drawRain() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = '#ff69b4'; // Màu hồng
-            ctx.font = fontSize + 'px arial';
-
-            for (let i = 0; i < drops.length; i++) {
-                const text = charList[Math.floor(Math.random() * charList.length)];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
+                col.appendChild(moveDiv);
+                bgContainer.appendChild(col);
             }
         }
 
-        // 2. Điều khiển hiển thị Text (Đã cập nhật đủ 7 tin nhắn)
-        const messages = ["msg1", "msg2", "msg3", "msg4", "msg5", "msg6", "msg7"];
-        let currentIdx = 0;
-
-        function showNextMessage() {
-            if (currentIdx < messages.length) {
-                const msgElement = document.getElementById(messages[currentIdx]);
-
-                // Hiện text
-                msgElement.style.display = "block";
-                setTimeout(() => {
-                    msgElement.style.opacity = "1";
-                }, 100);
-
-                // Sau 3.5 giây thì ẩn đi và chuyển dòng mới (trừ dòng cuối cùng sẽ giữ lại mãi mãi)
-                if (currentIdx < messages.length - 1) {
-                    setTimeout(() => {
-                        msgElement.classList.add('fade-out');
-                        setTimeout(() => {
-                            msgElement.style.display = "none";
-                            currentIdx++;
-                            showNextMessage();
-                        }, 1000); // Đợi hiệu ứng tắt hẳn rồi mới nhảy dòng tiếp theo
-                    }, 3500);
-                }
-            }
-        }
-
-        setInterval(drawRain, 33);
-
-        // Bắt đầu hiện text sau 2 giây khi web load
-        setTimeout(showNextMessage, 2000);
-
-        // Cập nhật kích thước khi resize màn hình
         window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            if (bgContainer.style.display === 'flex') {
+                buildMatrixBackground();
+            }
         });
+
+        function triggerYes() {
+            document.getElementById('viewInterface').style.display = 'none';
+            buildMatrixBackground();
+            bgContainer.style.display = 'flex';
+            setTimeout(() => bgContainer.style.opacity = '1', 10);
+            document.getElementById('neonSet').style.display = 'flex';
+        }
+
+        function triggerNo() {
+            // Hiệu ứng rung được tinh chỉnh để không làm 'lộ' khoảng hở ở viền
+            const frame = document.getElementById('popupWindow');
+            // Dịch chuyển ít hơn và nhanh hơn để tạo cảm giác phản hồi nhanh mà không làm hỏng viền
+            frame.style.transform = 'translate(2px, 2px)';
+            setTimeout(() => frame.style.transform = 'translate(-2px, -2px)', 30);
+            setTimeout(() => frame.style.transform = 'translate(2px, -1px)', 60);
+            setTimeout(() => frame.style.transform = 'translate(0px, 0px)', 100);
+            
+            yesScale += 0.25;
+            yesBtn.style.transform = `scale(${yesScale})`;
+
+            const randomX = (Math.random() - 0.5) * 15; // Giảm độ dịch chuyển ngẫu nhiên
+            const randomY = (Math.random() - 0.5) * 15;
+            noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+        }
     </script>
 </body>
 </html>
