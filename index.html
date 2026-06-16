@@ -2,153 +2,133 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Ultimate Fireworks Show</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xì Dách Casino Professional</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Arial'; }
-        #loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; color: white; z-index: 100;
-        }
-        #bar-container { width: 250px; height: 4px; background: #333; margin-top: 20px; border-radius: 10px; overflow: hidden; }
-        #bar { width: 0%; height: 100%; background: white; transition: width 2s linear; }
-        canvas { display: block; }
+        :root { --primary: #f1c40f; --success: #2ecc71; --danger: #e74c3c; --bg: #1a472a; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .casino-table { width: 95%; max-width: 600px; background: rgba(0,0,0,0.5); padding: 30px; border-radius: 50px; border: 10px solid #5d4037; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
+        .slot { border: 2px dashed rgba(255,255,255,0.2); min-height: 140px; margin: 20px 0; border-radius: 15px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; }
+        .card { width: 70px; height: 100px; background: white; color: black; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; box-shadow: 3px 5px 15px rgba(0,0,0,0.3); border: 1px solid #ddd; animation: flip 0.4s ease-out; position: relative; }
+        @keyframes flip { from { transform: scale(0.5) rotateY(90deg); opacity: 0; } to { transform: scale(1) rotateY(0); opacity: 1; } }
+        .red { color: var(--danger); }
+        .score-tag { display: inline-block; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 20px; font-size: 14px; margin-bottom: 5px; color: var(--primary); border: 1px solid var(--primary); }
+        .controls { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        #btn-deal { grid-column: span 2; background: var(--primary); color: black; }
+        #btn-hit { background: var(--success); color: white; }
+        #btn-stand { background: var(--danger); color: white; }
+        button { padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
+        button:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.1); }
+        button:active { transform: translateY(0); }
+        button:disabled { background: #555 !important; color: #888; cursor: not-allowed; opacity: 0.5; }
+        #message { font-size: 22px; font-weight: bold; color: var(--primary); height: 40px; margin-bottom: 10px; text-shadow: 2px 2px 4px black; }
     </style>
 </head>
 <body>
 
-    <div id="loading-screen">
-        <h2 id="status">Loading...</h2>
-        <div id="bar-container"><div id="bar"></div></div>
+<div class="casino-table">
+    <div id="message">SẴN SÀNG TRẢI NGHIỆM?</div>
+
+    <div>
+        <div class="score-tag">NHÀ CÁI: <span id="d-score">?</span></div>
+        <div id="d-zone" class="slot"></div>
     </div>
 
-    <canvas id="canvas"></canvas>
+    <hr style="opacity: 0.1; margin: 20px 0;">
+
+    <div>
+        <div id="p-zone" class="slot"></div>
+        <div class="score-tag">BẠN: <span id="p-score">0</span></div>
+    </div>
+
+    <div class="controls">
+        <button id="btn-deal">CHIA BÀI</button>
+        <button id="btn-hit" disabled>RÚT BÀI</button>
+        <button id="btn-stand" disabled>DẰN BÀI</button>
+    </div>
+</div>
 
 <script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const bar = document.getElementById('bar');
-const loadingScreen = document.getElementById('loading-screen');
+    // Khởi tạo các biến toàn cục
+    let deck = [], pHand = [], dHand = [], isPlaying = false;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+    // Các phần tử giao diện
+    const dom = {
+        msg: document.getElementById('message'),
+        pZone: document.getElementById('p-zone'),
+        dZone: document.getElementById('d-zone'),
+        pScore: document.getElementById('p-score'),
+        dScore: document.getElementById('d-score'),
+        btnDeal: document.getElementById('btn-deal'),
+        btnHit: document.getElementById('btn-hit'),
+        btnStand: document.getElementById('btn-stand')
+    };
 
-// --- CẤU HÌNH ---
-const colors = ['#ff0040', '#ff00ff', '#00ffbf', '#00bfff', '#ffbf00', '#ff4000', '#ffffff'];
-let particles = [];
-let fireworkTimer = 0;
-let currentWordIndex = 0;
-const words = ["F", "U", "C", "K", "☺"];
-let showStarted = false;
-
-// Loading logic
-setTimeout(() => bar.style.width = '100%', 100);
-setTimeout(() => {
-    loadingScreen.style.opacity = '0';
-    setTimeout(() => {
-        loadingScreen.style.display = 'none';
-        showStarted = true;
-    }, 500);
-}, 2200);
-
-class Particle {
-    constructor(x, y, color, speed, angle, friction, gravity, char = null) {
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        this.char = char;
-        this.alpha = 1;
-        this.decay = Math.random() * 0.015 + 0.015;
-        this.vx = Math.cos(angle) * speed;
-        this.vy = Math.sin(angle) * speed;
-        this.friction = friction;
-        this.gravity = gravity;
+    function initDeck() {
+        const suits = ['♥', '♦', '♣', '♠'], ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        deck = [];
+        for (let s of suits) for (let r of ranks) deck.push({ r, s, color: (s === '♥' || s === '♦') ? 'red' : '' });
+        deck.sort(() => Math.random() - 0.5);
     }
 
-    draw() {
-        ctx.save();
-        ctx.globalAlpha = this.alpha;
-        ctx.fillStyle = this.color;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = this.color;
-
-        if (this.char) {
-            ctx.font = "bold 80px Arial"; // Chữ nổ to ở giữa
-            ctx.textAlign = "center";
-            ctx.fillText(this.char, this.x, this.y);
-        } else {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.restore();
+    function calc(hand) {
+        let s = 0, a = 0;
+        hand.forEach(c => {
+            if (['J', 'Q', 'K'].includes(c.r)) s += 10;
+            else if (c.r === 'A') { s += 11; a++; }
+            else s += parseInt(c.r);
+        });
+        while (s > 21 && a > 0) { s -= 10; a--; }
+        return s;
     }
 
-    update() {
-        this.vx *= this.friction;
-        this.vy *= this.friction;
-        this.vy += this.gravity;
-        this.x += this.vx;
-        this.y += this.vy;
-        this.alpha -= this.decay;
-    }
-}
+    function render(hideDealer = true) {
+        dom.pZone.innerHTML = pHand.map(c => `<div class="card ${c.color}">${c.r}<div>${c.s}</div></div>`).join('');
+        dom.dZone.innerHTML = dHand.map((c, i) => (i === 1 && hideDealer) ?
+            `<div class="card" style="background:#444; color:#444">?</div>` :
+            `<div class="card ${c.color}">${c.r}<div>${c.s}</div></div>`).join('');
 
-function createFirework(x, y, isText = false) {
-    const particleCount = isText ? 40 : 120; // Pháo hoa thật nổ nhiều hạt hơn
-    const color = isText ? "#FF69B4" : colors[Math.floor(Math.random() * colors.length)];
-    const char = isText ? words[currentWordIndex] : null;
-
-    for (let i = 0; i < particleCount; i++) {
-        const angle = (Math.PI * 2 / particleCount) * i;
-        const speed = isText ? Math.random() * 2 + 1 : Math.random() * 8 + 4;
-        particles.push(new Particle(
-            x, y, color, speed, angle,
-            0.96, 0.07,
-            (isText && i === 0) ? char : null // Chỉ 1 hạt mang chữ cái
-        ));
-    }
-    if (isText) currentWordIndex++;
-}
-
-function animate() {
-    // Tạo hiệu ứng đuôi mờ cho pháo hoa
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    if (showStarted) {
-        fireworkTimer++;
-
-        // Cứ mỗi 60 khung hình bắn 1 pháo hoa chữ hoặc pháo hoa sặc sỡ
-        if (fireworkTimer % 70 === 0) {
-            if (currentWordIndex < words.length) {
-                // Nổ chữ ở giữa
-                createFirework(canvas.width / 2, canvas.height * 0.4, true);
-            }
-        }
-
-        // Bắn pháo hoa sặc sỡ ngẫu nhiên xung quanh
-        if (Math.random() < 0.05) {
-            createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.6, false);
-        }
+        dom.pScore.innerText = calc(pHand);
+        dom.dScore.innerText = hideDealer ? "?" : calc(dHand);
     }
 
-    particles.forEach((p, i) => {
-        p.update();
-        p.draw();
-        if (p.alpha <= 0) particles.splice(i, 1);
-    });
+    dom.btnDeal.onclick = () => {
+        initDeck();
+        pHand = [deck.pop(), deck.pop()];
+        dHand = [deck.pop(), deck.pop()];
+        isPlaying = true;
 
-    requestAnimationFrame(animate);
-}
+        dom.btnDeal.disabled = true;
+        dom.btnHit.disabled = false;
+        dom.btnStand.disabled = false;
+        dom.msg.innerText = "CHỌN HÀNH ĐỘNG...";
+        render(true);
 
-animate();
+        if (calc(pHand) === 21) { dom.msg.innerText = "XÌ DÁCH!"; dom.btnStand.click(); }
+    };
 
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
+    dom.btnHit.onclick = () => {
+        pHand.push(deck.pop());
+        render(true);
+        if (calc(pHand) > 21) end("BẠN QUẮC! NHÀ CÁI THẮNG.");
+    };
+
+    dom.btnStand.onclick = () => {
+        while (calc(dHand) < 17) dHand.push(deck.pop());
+        let ps = calc(pHand), ds = calc(dHand);
+        let m = (ds > 21 || ps > ds) ? "BẠN THẮNG!" : (ps < ds ? "NHÀ CÁI THẮNG!" : "HÒA!");
+        end(m);
+    };
+
+    function end(m) {
+        isPlaying = false;
+        render(false);
+        dom.msg.innerText = m;
+        dom.btnDeal.disabled = false;
+        dom.btnHit.disabled = true;
+        dom.btnStand.disabled = true;
+    }
 </script>
+
 </body>
 </html>
-
