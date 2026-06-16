@@ -1,264 +1,154 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Do you love me?</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    
+    <title>Ultimate Fireworks Show</title>
     <style>
-        *, *::before, *::after {
-            box-sizing: border-box;
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Arial'; }
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: white; z-index: 100;
         }
-        
-        body {
-            background-color: #000000;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            height: 100vh;
-            font-family: 'Press Start 2P', monospace;
-        }
-        .wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-        }
-        .pixel-window {
-            background-color: #000000;
-            /* Đã thay đổi border style từ 'double' thành 'solid' để loại bỏ khoảng hở */
-            border: 6px solid #ffffff; 
-            width: 400px;
-            max-width: 90%;
-            box-shadow: 12px 12px 0px #1a1a1a;
-            /* Đảm bảo nội dung không bị lộ ra ngoài đường viền khi rung */
-            overflow: hidden;
-            transition: transform 0.1s ease;
-        }
-
-        .window-bar {
-            /* Đường kẻ dưới thanh tiêu đề */
-            border-bottom: 4px solid #ffffff;
-            padding: 10px;
-            display: flex;
-            gap: 6px;
-        }
-
-        .window-dot {
-            width: 8px;
-            height: 8px;
-            /* Nút tròn dạng pixel, đổi sang 'solid' để thống nhất */
-            border: 2px solid #ffffff;
-        }
-
-        .window-body {
-            padding: 50px 20px;
-            text-align: center;
-        }
-
-        .title-text {
-            color: #ffffff;
-            font-size: 13pt;
-            line-height: 1.6;
-            margin: 0 0 45px 0;
-            font-weight: normal;
-        }
-
-        .btn-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 30px;
-        }
-        .pixel-btn {
-            background: transparent;
-            color: #ffffff;
-            border: 4px outset #ffffff; 
-            padding: 12px 24px;
-            font-size: 11pt;
-            cursor: pointer;
-            font-family: 'Press Start 2P', monospace;
-            outline: none;
-            transition: transform 0.2s ease;
-        }
-
-        .pixel-btn:hover {
-            background: #ffffff;
-            color: #000000;
-            border: 4px inset #ffffff; 
-        }
-        .neon-center-set {
-            display: none;
-            position: absolute;
-            top: 53%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0px;
-            z-index: 6;
-            user-select: none;
-            pointer-events: none;
-        }
-        .neon-text {
-            color: #ffccff;
-            font-size: 26pt;
-            text-align: center;
-            margin-bottom: 5px;
-            text-shadow: 
-                0 0 5px #ffccff,
-                0 0 15px #ff3399,
-                0 0 30px #ff3399;
-        }
-        .neon-heart-svg {
-            width: 140px;
-            height: 140px;
-            filter: drop-shadow(0 0 4px #ffccff)
-                    drop-shadow(0 0 10px #ff3399)
-                    drop-shadow(0 0 25px #ff3399)
-                    drop-shadow(0 0 45px #ff3399);
-        }
-        .matrix-bg {
-            display: none; 
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: space-between;
-            overflow: hidden;
-            z-index: 1;
-            opacity: 0; 
-            transition: opacity 0.2s ease;
-        }
-        .matrix-column {
-            display: flex;
-            flex-direction: column;
-            white-space: nowrap;
-            font-size: 13px; 
-            line-height: 1.5;
-            color: rgba(255, 51, 153, 0.45);
-            user-select: none;
-        }
-        .matrix-move {
-            animation: scrollDown 10s linear infinite;
-        }
-        .matrix-column:nth-child(even) .matrix-move {
-            animation: scrollDown 7s linear infinite;
-        }
-
-        @keyframes scrollDown {
-            0% {
-                transform: translateY(-50%);
-            }
-            100% {
-                transform: translateY(0%);
-            }
-        }
+        #bar-container { width: 250px; height: 4px; background: #333; margin-top: 20px; border-radius: 10px; overflow: hidden; }
+        #bar { width: 0%; height: 100%; background: white; transition: width 2s linear; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
 
-    <div class="wrapper" id="viewInterface">
-        <div class="pixel-window" id="popupWindow">
-            <div class="window-bar">
-                <span class="window-dot"></span>
-                <span class="window-dot"></span>
-                <span class="window-dot"></span>
-            </div>
-            <div class="window-body">
-                <h1 class="title-text">Do you love me?</h1>
-                <div class="btn-container">
-                    <button class="pixel-btn" id="yesBtn" onclick="triggerYes()">Yes</button>
-                    <button class="pixel-btn" id="noBtn" onclick="triggerNo()">No</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="neon-center-set" id="neonSet">
-        <div class="neon-text">I LOVE U TOO</div>
-        
-        <svg class="neon-heart-svg" viewBox="0 0 24 24" fill="#ffccff">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-        </svg>
+    <div id="loading-screen">
+        <h2 id="status">Loading...</h2>
+        <div id="bar-container"><div id="bar"></div></div>
     </div>
 
-    <div class="matrix-bg" id="bgContainer"></div>
+    <canvas id="canvas"></canvas>
 
-    <script>
-        const bgContainer = document.getElementById('bgContainer');
-        const yesBtn = document.getElementById('yesBtn');
-        const noBtn = document.getElementById('noBtn');
-        let yesScale = 1;
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const bar = document.getElementById('bar');
+const loadingScreen = document.getElementById('loading-screen');
 
-        function buildMatrixBackground() {
-            bgContainer.innerHTML = '';
-            
-            const charWidth = 140; 
-            const columnCount = Math.ceil(window.innerWidth / charWidth) + 1;
-            
-            let textBlock = "";
-            for (let i = 0; i < 60; i++) {
-                textBlock += "I LOVE U TOO<br>";
-            }
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-            for (let i = 0; i < columnCount; i++) {
-                const col = document.createElement('div');
-                col.className = 'matrix-column';
-                
-                const moveDiv = document.createElement('div');
-                moveDiv.className = 'matrix-move';
-                moveDiv.innerHTML = textBlock + textBlock;
-                
-                col.style.opacity = (Math.random() * 0.5 + 0.3).toFixed(2);
-                moveDiv.style.animationDelay = (Math.random() * -10) + 's';
+// --- CẤU HÌNH ---
+const colors = ['#ff0040', '#ff00ff', '#00ffbf', '#00bfff', '#ffbf00', '#ff4000', '#ffffff'];
+let particles = [];
+let fireworkTimer = 0;
+let currentWordIndex = 0;
+const words = ["F", "U", "C", "K", "☺"];
+let showStarted = false;
 
-                col.appendChild(moveDiv);
-                bgContainer.appendChild(col);
+// Loading logic
+setTimeout(() => bar.style.width = '100%', 100);
+setTimeout(() => {
+    loadingScreen.style.opacity = '0';
+    setTimeout(() => {
+        loadingScreen.style.display = 'none';
+        showStarted = true;
+    }, 500);
+}, 2200);
+
+class Particle {
+    constructor(x, y, color, speed, angle, friction, gravity, char = null) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.char = char;
+        this.alpha = 1;
+        this.decay = Math.random() * 0.015 + 0.015;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.friction = friction;
+        this.gravity = gravity;
+    }
+
+    draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.color;
+
+        if (this.char) {
+            ctx.font = "bold 80px Arial"; // Chữ nổ to ở giữa
+            ctx.textAlign = "center";
+            ctx.fillText(this.char, this.x, this.y);
+        } else {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    update() {
+        this.vx *= this.friction;
+        this.vy *= this.friction;
+        this.vy += this.gravity;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= this.decay;
+    }
+}
+
+function createFirework(x, y, isText = false) {
+    const particleCount = isText ? 40 : 120; // Pháo hoa thật nổ nhiều hạt hơn
+    const color = isText ? "#FF69B4" : colors[Math.floor(Math.random() * colors.length)];
+    const char = isText ? words[currentWordIndex] : null;
+
+    for (let i = 0; i < particleCount; i++) {
+        const angle = (Math.PI * 2 / particleCount) * i;
+        const speed = isText ? Math.random() * 2 + 1 : Math.random() * 8 + 4;
+        particles.push(new Particle(
+            x, y, color, speed, angle,
+            0.96, 0.07,
+            (isText && i === 0) ? char : null // Chỉ 1 hạt mang chữ cái
+        ));
+    }
+    if (isText) currentWordIndex++;
+}
+
+function animate() {
+    // Tạo hiệu ứng đuôi mờ cho pháo hoa
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (showStarted) {
+        fireworkTimer++;
+
+        // Cứ mỗi 60 khung hình bắn 1 pháo hoa chữ hoặc pháo hoa sặc sỡ
+        if (fireworkTimer % 70 === 0) {
+            if (currentWordIndex < words.length) {
+                // Nổ chữ ở giữa
+                createFirework(canvas.width / 2, canvas.height * 0.4, true);
             }
         }
 
-        window.addEventListener('resize', () => {
-            if (bgContainer.style.display === 'flex') {
-                buildMatrixBackground();
-            }
-        });
-
-        function triggerYes() {
-            document.getElementById('viewInterface').style.display = 'none';
-            buildMatrixBackground();
-            bgContainer.style.display = 'flex';
-            setTimeout(() => bgContainer.style.opacity = '1', 10);
-            document.getElementById('neonSet').style.display = 'flex';
+        // Bắn pháo hoa sặc sỡ ngẫu nhiên xung quanh
+        if (Math.random() < 0.05) {
+            createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.6, false);
         }
+    }
 
-        function triggerNo() {
-            // Hiệu ứng rung được tinh chỉnh để không làm 'lộ' khoảng hở ở viền
-            const frame = document.getElementById('popupWindow');
-            // Dịch chuyển ít hơn và nhanh hơn để tạo cảm giác phản hồi nhanh mà không làm hỏng viền
-            frame.style.transform = 'translate(2px, 2px)';
-            setTimeout(() => frame.style.transform = 'translate(-2px, -2px)', 30);
-            setTimeout(() => frame.style.transform = 'translate(2px, -1px)', 60);
-            setTimeout(() => frame.style.transform = 'translate(0px, 0px)', 100);
-            
-            yesScale += 0.25;
-            yesBtn.style.transform = `scale(${yesScale})`;
+    particles.forEach((p, i) => {
+        p.update();
+        p.draw();
+        if (p.alpha <= 0) particles.splice(i, 1);
+    });
 
-            const randomX = (Math.random() - 0.5) * 15; // Giảm độ dịch chuyển ngẫu nhiên
-            const randomY = (Math.random() - 0.5) * 15;
-            noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
-        }
-    </script>
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
 </body>
 </html>
+
